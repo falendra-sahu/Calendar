@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .calendar {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 350px;
+            background-color: #fff;
+        }
+        .calendar-header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+        .calendar-header select {
+            padding: 5px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .calendar-header button {
+            padding: 5px 10px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .calendar-days div {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .calendar-days .day-name {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        .calendar-days .day {
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .calendar-days .day.selected {
+            background-color: #ff5722;
+            color: white;
+            border-radius: 5px;
+        }
+        .calendar-days .day.highlight {
+            background-color: #ffeb3b;
+        }
+        .calendar-days .day:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar">
+        <div class="calendar-header">
+            <span>Calendar</span>
+            <div>
+                <select id="yearSelect"></select>
+                <select id="monthSelect"></select>
+                <button id="currentMonthButton">Current Month</button>
+            </div>
+        </div>
+        <div class="calendar-days" id="calendarDays">
+            <!-- Calendar days will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearSelect = document.getElementById('yearSelect');
+            const monthSelect = document.getElementById('monthSelect');
+            const calendarDays = document.getElementById('calendarDays');
+            const currentMonthButton = document.getElementById('currentMonthButton');
+
+            // Initialize the years and months
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            
+            // Populate year dropdown with range from 1500 to 2099
+            for (let year = 1500; year <= 2099; year++) {
+                let option = document.createElement('option');
+                option.value = year;
+                option.text = year;
+                if (year === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+
+            // Populate month dropdown
+            for (let i = 0; i < months.length; i++) {
+                let option = document.createElement('option');
+                option.value = i;
+                option.text = months[i];
+                if (i === currentMonth) option.selected = true;
+                monthSelect.appendChild(option);
+            }
+
+            function generateCalendar(year, month) {
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                let html = '';
+
+                // Add day names
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                for (let day of dayNames) {
+                    html += `<div class="day-name">${day}</div>`;
+                }
+
+                // Add empty days before the start of the month
+                for (let i = 0; i < firstDay; i++) {
+                    html += `<div class="day"></div>`;
+                }
+
+                // Add days of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    let isToday = year === new Date().getFullYear() &&
+                                  month === new Date().getMonth() &&
+                                  day === new Date().getDate();
+                    html += `<div class="day${isToday ? ' highlight' : ''}" data-day="${day}">${day}</div>`;
+                }
+
+                calendarDays.innerHTML = html;
+            }
+
+            function handleDateClick(event) {
+                if (event.target.classList.contains('day')) {
+                    document.querySelectorAll('.calendar-days .day').forEach(day => day.classList.remove('selected'));
+                    event.target.classList.add('selected');
+                }
+            }
+
+            // Initial calendar display
+            generateCalendar(currentYear, currentMonth);
+
+            // Event listeners for the selects
+            yearSelect.addEventListener('change', function() {
+                generateCalendar(parseInt(yearSelect.value), parseInt(monthSelect.value));
+            });
+
+            monthSelect.addEventListener('change', function() {
+                generateCalendar(parseInt(yearSelect.value), parseInt(monthSelect.value));
+            });
+
+            calendarDays.addEventListener('click', handleDateClick);
+
+            currentMonthButton.addEventListener('click', function() {
+                yearSelect.value = currentYear;
+                monthSelect.value = currentMonth;
+                generateCalendar(currentYear, currentMonth);
+            });
+        });
+    </script>
+</body>
+</html>
